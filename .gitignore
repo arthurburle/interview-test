@@ -1,0 +1,3 @@
+container-files/node_modules
+container-files/src/**/*.js
+container-files/src/**/*.js.map

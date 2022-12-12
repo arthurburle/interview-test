@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-database
+  namespace: interview-test
+spec:
+  serviceName: "my-database"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-database
+  template:
+    metadata:
+      labels:
+        app: my-database
+    spec:
+      containers:
+      - name: my-database
+        image: mariadb:5.5
+        ports:
+        - containerPort: 3306
+          name: http-db-svc
+        envFrom:
+        - secretRef:
+            name: my-db-secret
+        volumeMounts:
+        - name: datadir
+          mountPath: /var/lib/mysql/
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 300M
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-database
+  namespace: interview-test
+spec:
+  clusterIP: None
+  selector:
+    app: my-database
+  ports:
+  - name: http-db-svc
+    port: 3306
